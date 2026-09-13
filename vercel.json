@@ -1,14 +1,14 @@
 {
   "builds": [
     {
-      "src": "core/wsgi.py",
+      "src": "cinestream_app/core/wsgi.py",
       "use": "@vercel/python"
     }
   ],
   "routes": [
     {
       "src": "/(.*)",
-      "dest": "core/wsgi.py"
+      "dest": "cinestream_app/core/wsgi.py"
     }
   ]
 }
