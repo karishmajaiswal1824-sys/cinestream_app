@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        @page { size: A4 landscape; margin: 15mm; }
+        body { font-family: Helvetica, sans-serif; }
+        .ticket { border: 2px dashed #6366f1; padding: 30px; background: #f8fafc; display: flex; }
+        .details { width: 70%; }
+        .qr { width: 30%; text-align: right; }
+        h1 { color: #0f172a; margin: 0; }
+        .label { font-weight: bold; color: #64748b; }
+        img { width: 150px; height: 150px; }
+    </style>
+</head>
+<body>
+    <div class="ticket">
+        <div class="details">
+            <h1>{{ booking.show.movie.title }}</h1>
+            <p><span class="label">Theater:</span> {{ booking.show.theater.name }}</p>
+            <p><span class="label">Date:</span> {{ booking.show.show_time }}</p>
+            <p><span class="label">Seats:</span> {{ booking.seats }}</p>
+            <p><span class="label">Booking ID:</span> {{ booking.booking_id }}</p>
+            <p><span class="label">Paid:</span> ₹{{ booking.total_amount }}</p>
+        </div>
+        <div class="qr">
+            <img src="data:image/png;base64,{{ qr_code }}" alt="QR">
+            <p style="font-size: 10px;">Scan at Entry</p>
+        </div>
+    </div>
+</body>
+</html>

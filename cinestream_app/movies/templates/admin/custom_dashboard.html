@@ -1,0 +1,30 @@
+{% extends "admin/base_site.html" %}
+{% block content %}
+<div style="font-family: Arial, sans-serif; padding: 20px;">
+    <h1>Business Analytics Dashboard</h1>
+    <a href="{% url 'custom_admin:export_csv' %}" style="background: #4CAF50; color: white; padding: 10px 15px; text-decoration: none; border-radius: 5px; font-weight:bold;">📥 Export CSV Report</a>
+    <hr style="margin: 20px 0;">
+    <div style="display: flex; gap: 20px;">
+        <div style="background: #e8f5e9; padding: 20px; border-radius: 10px; flex: 1;">
+            <h3 style="margin:0; color:#2e7d32;">Total Revenue</h3>
+            <p style="font-size: 28px; font-weight:bold; margin:10px 0; color: #1b5e20;">₹{{ total_revenue }}</p>
+        </div>
+        <div style="background: #e3f2fd; padding: 20px; border-radius: 10px; flex: 1;">
+            <h3 style="margin:0; color:#1565c0;">Successful Bookings</h3>
+            <p style="font-size: 28px; font-weight:bold; margin:10px 0; color: #0d47a1;">{{ successful_bookings }}</p>
+        </div>
+        <div style="background: #ffebee; padding: 20px; border-radius: 10px; flex: 1;">
+            <h3 style="margin:0; color:#c62828;">Failed Payments</h3>
+            <p style="font-size: 28px; font-weight:bold; margin:10px 0; color: #b71c1c;">{{ failed_payments }}</p>
+        </div>
+    </div>
+    <h2 style="margin-top: 40px; border-bottom: 2px solid #ccc; padding-bottom:10px;">Top Performing Movies</h2>
+    <ul style="font-size:18px; line-height: 1.8;">
+        {% for movie in top_movies %}
+        <li><strong>{{ movie.show__movie__title }}</strong> - {{ movie.bookings }} tickets sold</li>
+        {% empty %}
+        <li>No bookings yet.</li>
+        {% endfor %}
+    </ul>
+</div>
+{% endblock %}

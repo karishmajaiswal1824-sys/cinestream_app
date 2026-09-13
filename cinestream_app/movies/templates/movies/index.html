@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CineStream - Premium Movie Discovery</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #0b0f19;
+            --card-bg: #1a2235;
+            --primary: #6366f1;
+            --primary-hover: #4f46e5;
+            --accent: #e11d48;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border: #2e3c54;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+        body { background-color: var(--bg-dark); color: var(--text-main); line-height: 1.6; }
+        
+        /* Navbar */
+        .navbar { background-color: rgba(26, 34, 53, 0.95); backdrop-filter: blur(10px); padding: 15px 40px; position: sticky; top: 0; z-index: 100; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+        .navbar h1 { font-size: 26px; font-weight: 700; color: var(--text-main); letter-spacing: 1px;}
+        .navbar h1 span { color: var(--primary); }
+        
+        /* Layout */
+        .container { max-width: 1300px; margin: 30px auto; padding: 0 20px; display: grid; grid-template-columns: 280px 1fr; gap: 40px; }
+        
+        /* Sidebar Filters */
+        .sidebar { background: var(--card-bg); padding: 25px; border-radius: 16px; height: fit-content; border: 1px solid var(--border); box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+        .sidebar h3 { font-size: 16px; margin-bottom: 20px; color: var(--text-main); font-weight: 600; display: flex; justify-content: space-between; align-items: center; }
+        .sidebar h3 span { background: rgba(99, 102, 241, 0.15); color: #a5b4fc; padding: 4px 12px; border-radius: 20px; font-size: 13px; font-weight: 600; }
+        
+        .form-group { margin-bottom: 18px; }
+        .form-group label { display: block; font-size: 13px; color: var(--text-muted); margin-bottom: 6px; font-weight: 500; }
+        input, select { width: 100%; padding: 12px 15px; background: #0b0f19; border: 1px solid var(--border); color: white; border-radius: 10px; font-size: 14px; outline: none; transition: all 0.3s ease; }
+        input:focus, select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(99,102,241,0.2); }
+        
+        .btn-primary { width: 100%; background: linear-gradient(135deg, var(--primary), #818cf8); color: white; border: none; padding: 14px; border-radius: 10px; font-weight: 600; font-size: 15px; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; margin-top: 10px; }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(99,102,241,0.4); }
+        
+        /* Movie Grid */
+        .main-content h2 { font-size: 24px; font-weight: 600; margin-bottom: 25px; color: white; border-left: 4px solid var(--primary); padding-left: 12px; line-height: 1; }
+        .movie-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 30px; }
+        
+        /* Movie Card */
+        .card { background: var(--card-bg); border-radius: 16px; overflow: hidden; border: 1px solid var(--border); transition: all 0.3s ease; position: relative; display: flex; flex-direction: column; }
+        .card:hover { transform: translateY(-8px); box-shadow: 0 20px 40px rgba(0,0,0,0.4); border-color: #4b5563; }
+        
+        /* Placeholder for Poster */
+        .card-image-placeholder { height: 180px; background: linear-gradient(135deg, #1e293b, #0f172a); display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 45px; border-bottom: 1px solid var(--border); }
+        
+        .card-content { padding: 22px; display: flex; flex-direction: column; flex-grow: 1; }
+        .card-title { font-size: 19px; font-weight: 600; margin-bottom: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text-main); }
+        
+        .badges { display: flex; gap: 8px; margin-bottom: 18px; flex-wrap: wrap; }
+        .badge { font-size: 12px; font-weight: 500; padding: 4px 10px; border-radius: 6px; background: rgba(255,255,255,0.05); color: var(--text-muted); border: 1px solid rgba(255,255,255,0.1); }
+        .badge-rating { background: rgba(245, 158, 11, 0.1); color: #f59e0b; border-color: rgba(245, 158, 11, 0.2); font-weight: 600; }
+        
+        .card-footer { margin-top: auto; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 18px; }
+        .price { font-size: 18px; font-weight: 600; color: #10b981; }
+        
+        .book-btn { background: var(--accent); color: white; text-decoration: none; padding: 10px 18px; border-radius: 8px; font-size: 14px; font-weight: 600; transition: all 0.3s; display: inline-block; text-align: center; }
+        .book-btn:hover { background: #be123c; transform: scale(1.05); }
+
+        /* Empty State */
+        .empty-state { grid-column: 1 / -1; text-align: center; padding: 60px 20px; background: var(--card-bg); border-radius: 16px; border: 2px dashed var(--border); color: var(--text-muted); }
+        .empty-state span { font-size: 50px; display: block; margin-bottom: 15px; }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <h1>Cine<span>Stream</span></h1>
+        <div style="font-size: 14px; color: var(--text-muted); font-weight: 500;">Premium Movie Booking</div>
+    </nav>
+
+    <div class="container">
+        <!-- Sidebar Filters -->
+        <aside class="sidebar">
+            <h3>Filters <span id="movie-count">{{ count }} Found</span></h3>
+            <form method="GET" id="filter-form">
+                <div class="form-group">
+                    <label>Search Movies</label>
+                    <input type="text" name="search" placeholder="Type a movie title..." class="auto-filter" value="{{ request.GET.search|default:'' }}">
+                </div>
+                <div class="form-group">
+                    <label>Genre</label>
+                    <select name="genre" class="auto-filter">
+                        <option value="">All Genres</option>
+                        {% for g in genres %}
+                            <option value="{{ g.id }}" {% if request.GET.genre == g.id|stringformat:"i" %}selected{% endif %}>{{ g.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Sort By</label>
+                    <select name="sort" class="auto-filter">
+                        <option value="popularity" {% if request.GET.sort == 'popularity' %}selected{% endif %}>Most Popular</option>
+                        <option value="rating" {% if request.GET.sort == 'rating' %}selected{% endif %}>Top Rated</option>
+                        <option value="newest" {% if request.GET.sort == 'newest' %}selected{% endif %}>Newest Releases</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn-primary">Apply Filters</button>
+            </form>
+        </aside>
+        
+        <!-- Movie Grid Section -->
+        <main class="main-content">
+            
+            {% if recommended_movies %}
+            <h2 style="color: #f59e0b; border-left-color: #f59e0b;">🌟 Recommended For You</h2>
+            <div class="movie-grid" style="margin-bottom: 40px;">
+                {% for movie in recommended_movies %}
+                <div class="card" style="border-color: #f59e0b;">
+                    <div class="card-image-placeholder">🍿</div>
+                    <div class="card-content">
+                        <div class="card-title">{{ movie.title }}</div>
+                        <div class="badges">
+                            <span class="badge badge-rating">⭐ {{ movie.rating }}</span>
+                            {% for genre in movie.genres.all %}
+                                <span class="badge">{{ genre.name }}</span>
+                            {% endfor %}
+                        </div>
+                        <div class="card-footer">
+                            <div class="price">₹{{ movie.price }}</div>
+                            {% if movie.showtimes.first %}
+                                <a href="{% url 'seat_selection' movie.showtimes.first.id %}" class="book-btn">Select Seats</a>
+                            {% else %}
+                                <span style="color:var(--text-muted); font-size:12px;">No Shows Available</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <h2>Now Showing</h2>
+            <div class="movie-grid">
+                {% for movie in page_obj %}
+                <div class="card">
+                    <div class="card-image-placeholder">🍿</div>
+                    <div class="card-content">
+                        <div class="card-title">{{ movie.title }}</div>
+                        <div class="badges">
+                            <span class="badge badge-rating">⭐ {{ movie.rating }}</span>
+                            {% for genre in movie.genres.all %}
+                                <span class="badge">{{ genre.name }}</span>
+                            {% endfor %}
+                        </div>
+                        <div class="card-footer">
+                            <div class="price">₹{{ movie.price }}</div>
+                            {% if movie.showtimes.first %}
+                                <a href="{% url 'seat_selection' movie.showtimes.first.id %}" class="book-btn">Select Seats</a>
+                            {% else %}
+                                <span style="color:var(--text-muted); font-size:12px;">No Shows Available</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="empty-state">
+                    <span>🎬</span>
+                    <h3 style="margin-bottom: 10px; color: white; font-size: 20px;">No Movies Available</h3>
+                    <p>Go to the Admin panel (127.0.0.1:8000/admin) to add some movies, or clear your filters.</p>
+                </div>
+                {% endfor %}
+            </div>
+        </main>
+    </div>
+
+    <!-- AJAX Script for Live Match Counter -->
+    <script>
+        const form = document.getElementById('filter-form');
+        const inputs = document.querySelectorAll('.auto-filter');
+
+        inputs.forEach(input => {
+            input.addEventListener('change', updateCount);
+            if(input.type === 'text') input.addEventListener('keyup', updateCount);
+        });
+
+        function updateCount() {
+            const searchParams = new URLSearchParams(new FormData(form));
+            fetch(`/?${searchParams.toString()}`, {
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            })
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById('movie-count').innerText = `${data.count} Found`;
+            });
+        }
+    </script>
+</body>
+</html>

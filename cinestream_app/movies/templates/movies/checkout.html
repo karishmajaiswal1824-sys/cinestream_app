@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Checkout</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        body { background: #f8fafc; font-family: 'Poppins', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .card { background: white; padding: 40px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); width: 400px; }
+        .timer { color: #e11d48; font-weight: bold; text-align: center; margin-bottom: 20px; }
+        .summary { background: #f1f5f9; padding: 20px; border-radius: 10px; margin-bottom: 20px; }
+        input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box;}
+        button { width: 100%; background: #10b981; color: white; padding: 15px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h2 style="text-align:center; margin-top:0;">Payment</h2>
+        <div class="timer">Time left: <span id="time">02:00</span></div>
+        
+        <div class="summary">
+            <p><strong>Movie:</strong> {{ booking.show.movie.title }}</p>
+            <p><strong>Seats:</strong> {{ booking.seats }}</p>
+            <hr>
+            <h3 style="color:#10b981;">Total: ₹{{ booking.total_amount }}</h3>
+        </div>
+
+        <input type="text" placeholder="Name on Card" value="Internship Tester">
+        <input type="text" placeholder="Card Number" value="4111 1111 1111 1111">
+        <button onclick="pay()" id="paybtn">Pay Now</button>
+    </div>
+
+    <script>
+        let time = 120;
+        setInterval(() => {
+            if(time <= 0) { alert("Time expired!"); window.location.href="/"; return; }
+            time--;
+            let m = Math.floor(time/60); let s = time%60;
+            document.getElementById('time').innerText = `0${m}:${s<10?'0':''}${s}`;
+        }, 1000);
+
+        async function pay() {
+            document.getElementById('paybtn').innerText = "Processing...";
+            let response = await fetch(`/webhook/payment/`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ booking_id: "{{ booking.id }}", transaction_id: "txn_" + Date.now(), status: "SUCCESS" })
+            });
+            let data = await response.json();
+            alert(data.message);
+            window.location.href = `/ticket/download/{{ booking.id }}/`;
+        }
+    </script>
+</body>
+</html>

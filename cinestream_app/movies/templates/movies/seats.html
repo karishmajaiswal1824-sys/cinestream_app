@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Select Seats</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        body { background: #0b0f19; color: white; font-family: 'Poppins', sans-serif; text-align: center; padding: 40px; margin-bottom: 100px;}
+        .screen { background: #6366f1; height: 10px; width: 60%; margin: 0 auto 40px; border-radius: 50% 50% 0 0; }
+        .seat-grid { display: inline-block; background: #1a2235; padding: 40px; border-radius: 15px; }
+        .row { display: flex; align-items: center; justify-content: center; margin-bottom: 15px; }
+        .row-label { width: 30px; font-weight: bold; color: #94a3b8; }
+        .seat { width: 35px; height: 35px; background: #334155; margin: 0 6px; border-radius: 8px 8px 4px 4px; cursor: pointer; }
+        .seat:hover:not(.booked):not(.locked) { background: #475569; }
+        .seat.selected { background: #10b981; }
+        .seat.locked { background: #f59e0b; cursor: not-allowed; }
+        .seat.booked { background: #e11d48; cursor: not-allowed; }
+        .bottom-bar { position: fixed; bottom: 0; left: 0; width: 100%; background: #1a2235; padding: 20px; display: flex; justify-content: space-around; align-items: center; border-top: 1px solid #2e3c54;}
+        .btn { background: #6366f1; color: white; border: none; padding: 12px 30px; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        .btn:disabled { background: #334155; cursor: not-allowed; }
+    </style>
+</head>
+<body>
+    <h2>{{ show.movie.title }}</h2>
+    <p>{{ show.theater.name }} | {{ show.show_time|date:"d M, h:i A" }}</p>
+
+    <div class="screen"></div>
+    
+    <div class="seat-grid">
+        {% for row in seat_map %}
+        <div class="row">
+            <div class="row-label">{{ row.row }}</div>
+            {% for seat in row.seats %}
+                <div class="seat {{ seat.status }}" data-seat="{{ seat.number }}"></div>
+            {% endfor %}
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="bottom-bar">
+        <div>Seats: <strong id="selected-list">None</strong></div>
+        <div>Total: <strong style="color:#10b981; font-size: 24px;">₹<span id="price">0</span></strong></div>
+        <button class="btn" id="proceed" disabled onclick="lockSeats()">Proceed to Checkout</button>
+    </div>
+
+    <script>
+        let selected = [];
+        const price = {{ show.movie.price }};
+        
+        document.querySelectorAll('.seat.available').forEach(seat => {
+            seat.addEventListener('click', () => {
+                seat.classList.toggle('selected');
+                const num = seat.getAttribute('data-seat');
+                if(selected.includes(num)) {
+                    selected = selected.filter(s => s !== num);
+                } else {
+                    if (selected.length >= 6) { alert("Max 6 seats."); seat.classList.remove('selected'); return; }
+                    selected.push(num);
+                }
+                document.getElementById('selected-list').innerText = selected.length ? selected.join(', ') : 'None';
+                document.getElementById('price').innerText = selected.length * price;
+                document.getElementById('proceed').disabled = selected.length === 0;
+            });
+        });
+
+        async function lockSeats() {
+            document.getElementById('proceed').innerText = "Locking...";
+            document.getElementById('proceed').disabled = true;
+
+            let response = await fetch(`/lock-seats/{{ show.id }}/`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ seats: selected })
+            });
+            let data = await response.json();
+            
+            if(data.status === 'success') {
+                window.location.href = `/checkout/${data.booking_id}/`;
+            } else {
+                alert(data.error); location.reload();
+            }
+        }
+    </script>
+</body>
+</html>
